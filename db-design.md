@@ -1,4 +1,4 @@
-# DB設計書
+﻿# DB設計書
 
 ## 1. 目的
 このDB設計書は、ToDoアプリで使うデータベースの表を決めるためのものです。  
@@ -17,7 +17,7 @@
 | `title` | `VARCHAR(255)` | NO | なし | なし | やること | 要件 2-1 の `title`、要件 5 の「やることは空欄にしない」「255文字以内」 |
 | `detail` | `VARCHAR(255)` | YES | NULL | なし | メモ | 要件 2-1 の `detail`、要件 5 の「メモは255文字以内」 |
 | `category` | `VARCHAR(255)` | NO | なし | なし | ジャンル | 要件 2-1 の `category`、要件 2-2 のジャンル5つ、要件 5 の「5つから選ぶ」 |
-| `priority` | `INT` | NO | なし | なし | 優先度 | 要件 2-1 の `priority`、要件 4-1 の表示変換、要件 4-2 の入力、要件 5 の「選択肢から選ぶ」 |
+| `priority` | `INT` | NO | `2` | なし | 優先度 | 要件 2-1 の `priority`、要件 4-1 の表示変換、要件 4-2 の入力、要件 5 の「選択肢から選ぶ」 |
 | `due_date` | `DATE` | YES | NULL | なし | 期限 | 要件 2-1 の `due_date`、要件 4-2 の入力、要件 5 の「日付として入力する」 |
 | `completed` | `BOOLEAN` | NO | `false` | なし | 完了かどうか | 要件 2-1 の `completed`、要件 4-1 の表示変換 |
 | `created_at` | `DATETIME` | NO | 現在日時 | なし | 登録日時 | 要件 2-1 の `created_at` |
@@ -35,8 +35,8 @@
 - デザイン
 - マーケティング
 - プログラミング
-- 就活
-- 生活改善
+- 資格
+- 就職活動
 
 ## 5. ルール
 ### 5-1. `id`
@@ -80,7 +80,7 @@ CREATE TABLE todos (
     title VARCHAR(255) NOT NULL,
     detail VARCHAR(255),
     category VARCHAR(255) NOT NULL,
-    priority INT NOT NULL,
+    priority INT NOT NULL DEFAULT 2,
     due_date DATE,
     completed BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
