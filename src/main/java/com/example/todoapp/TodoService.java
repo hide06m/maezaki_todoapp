@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class TodoService {
 
@@ -23,13 +26,16 @@ public class TodoService {
 
     public void create(Todo todo) {
         todoMapper.insert(todo);
+        log.info("Todo登録 id={}", todo.getId());
     }
 
     public void update(Todo todo) {
         todoMapper.update(todo);
+        log.info("Todo編集 id={}", todo.getId());
     }
 
     public void delete(Long id) {
         todoMapper.deleteById(id);
+        log.info("Todo削除 id={}", id);
     }
 }
