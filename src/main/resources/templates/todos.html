@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -11,6 +11,33 @@
     <h1 class="page-title">Todo一覧</h1>
 
     <p class="flash" th:if="${message}" th:text="${message}"></p>
+
+    <form action="/todos" method="get">
+        <p>
+            <label for="keyword">やることの名前</label>
+            <input type="text" id="keyword" name="keyword" th:value="${keyword}">
+        </p>
+        <p>
+            <label for="category">ジャンル</label>
+            <select id="category" name="category">
+                <option value="すべて" th:selected="${selectedCategory == null || selectedCategory == '' || selectedCategory == 'すべて'}">すべて</option>
+                <option value="デザイン" th:selected="${selectedCategory == 'デザイン'}">デザイン</option>
+                <option value="マーケティング" th:selected="${selectedCategory == 'マーケティング'}">マーケティング</option>
+                <option value="プログラミング" th:selected="${selectedCategory == 'プログラミング'}">プログラミング</option>
+                <option value="資格" th:selected="${selectedCategory == '資格'}">資格</option>
+                <option value="就職活動" th:selected="${selectedCategory == '就職活動'}">就職活動</option>
+            </select>
+        </p>
+        <input type="hidden" name="order" th:value="${order}">
+        <p>
+            <button type="submit">絞り込む</button>
+        </p>
+    </form>
+
+    <p>
+        <a class="link" th:href="@{/todos(order='asc', keyword=${keyword}, category=${selectedCategory})}">期限が近い順</a>
+        <a class="link" th:href="@{/todos(order='desc', keyword=${keyword}, category=${selectedCategory})}">期限が遠い順</a>
+    </p>
 
     <p><a class="link" href="/todos/new">新規登録</a></p>
 

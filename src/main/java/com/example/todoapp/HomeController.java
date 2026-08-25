@@ -1,4 +1,4 @@
-package com.example.todoapp;
+﻿package com.example.todoapp;
 
 import java.util.List;
 
@@ -11,10 +11,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class HomeController {
+
+    private static final List<String> CATEGORIES = List.of(
+            "デザイン",
+            "マーケティング",
+            "プログラミング",
+            "資格",
+            "就職活動"
+    );
 
     private final TodoMapper todoMapper;
 
@@ -24,14 +33,22 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model) {
-        model.addAttribute("title", "Todoアプリ");
+        model.addAttribute("title", "Todo繧｢繝励Μ");
         return "index";
     }
 
     @GetMapping("/todos")
-    public String todos(Model model) {
-        List<Todo> todos = todoMapper.findAll();
+    public String todos(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false, defaultValue = "asc") String order,
+            Model model) {
+        List<Todo> todos = todoMapper.search(keyword, category, order);
         model.addAttribute("todos", todos);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedCategory", category);
+        model.addAttribute("order", order);
+        model.addAttribute("categories", CATEGORIES);
         return "todos";
     }
 
@@ -60,7 +77,7 @@ public class HomeController {
     @PostMapping("/todos")
     public String create(@ModelAttribute Todo todo, RedirectAttributes redirectAttributes) {
         todoMapper.insert(todo);
-        redirectAttributes.addFlashAttribute("message", "登録しました");
+        redirectAttributes.addFlashAttribute("message", "逋ｻ骭ｲ縺励∪縺励◆");
         return "redirect:/todos";
     }
 
@@ -68,7 +85,7 @@ public class HomeController {
     public String edit(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Todo todo = todoMapper.findById(id);
         if (todo == null) {
-            redirectAttributes.addFlashAttribute("message", "見つかりませんでした");
+            redirectAttributes.addFlashAttribute("message", "隕九▽縺九ｊ縺ｾ縺帙ｓ縺ｧ縺励◆");
             return "redirect:/todos";
         }
         model.addAttribute("todo", todo);
@@ -97,7 +114,7 @@ public class HomeController {
     public String update(@PathVariable Long id, @ModelAttribute Todo todo, RedirectAttributes redirectAttributes) {
         todo.setId(id);
         todoMapper.update(todo);
-        redirectAttributes.addFlashAttribute("message", "保存しました");
+        redirectAttributes.addFlashAttribute("message", "菫晏ｭ倥＠縺ｾ縺励◆");
         return "redirect:/todos";
     }
 
@@ -105,7 +122,7 @@ public class HomeController {
     public String deleteConfirm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Todo todo = todoMapper.findById(id);
         if (todo == null) {
-            redirectAttributes.addFlashAttribute("message", "見つかりませんでした");
+            redirectAttributes.addFlashAttribute("message", "隕九▽縺九ｊ縺ｾ縺帙ｓ縺ｧ縺励◆");
             return "redirect:/todos";
         }
         model.addAttribute("todo", todo);
@@ -115,7 +132,7 @@ public class HomeController {
     @PostMapping("/todos/{id}/delete")
     public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         todoMapper.deleteById(id);
-        redirectAttributes.addFlashAttribute("message", "削除しました");
+        redirectAttributes.addFlashAttribute("message", "蜑企勁縺励∪縺励◆");
         return "redirect:/todos";
     }
 }
