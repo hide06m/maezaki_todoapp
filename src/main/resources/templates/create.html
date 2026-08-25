@@ -10,42 +10,46 @@
 <main class="container">
     <h1 class="page-title">Todo登録</h1>
 
-    <form action="/todos/confirm" method="post">
+    <form action="/todos/confirm" method="post" th:object="${todo}">
         <div class="form-row">
             <label class="form-label" for="title">やること</label>
-            <input class="form-input" type="text" id="title" name="title" th:value="${todo.title}">
+            <input class="form-input" type="text" id="title" th:field="*{title}">
+            <p class="error" th:errors="*{title}"></p>
         </div>
 
         <div class="form-row">
             <label class="form-label" for="detail">メモ</label>
-            <input class="form-input" type="text" id="detail" name="detail" th:value="${todo.detail}">
+            <input class="form-input" type="text" id="detail" th:field="*{detail}">
+            <p class="error" th:errors="*{detail}"></p>
         </div>
 
         <div class="form-row">
             <label class="form-label" for="category">ジャンル</label>
-            <select class="form-input" id="category" name="category">
+            <select class="form-input" id="category" th:field="*{category}">
                 <option value=""></option>
-                <option value="デザイン" th:selected="${todo.category == 'デザイン'}">デザイン</option>
-                <option value="マーケティング" th:selected="${todo.category == 'マーケティング'}">マーケティング</option>
-                <option value="プログラミング" th:selected="${todo.category == 'プログラミング'}">プログラミング</option>
-                <option value="資格" th:selected="${todo.category == '資格'}">資格</option>
-                <option value="就職活動" th:selected="${todo.category == '就職活動'}">就職活動</option>
+                <option value="デザイン">デザイン</option>
+                <option value="マーケティング">マーケティング</option>
+                <option value="プログラミング">プログラミング</option>
+                <option value="営業">営業</option>
+                <option value="事務">事務</option>
             </select>
+            <p class="error" th:errors="*{category}"></p>
         </div>
 
         <div class="form-row">
             <label class="form-label" for="priority">優先度</label>
-            <select class="form-input" id="priority" name="priority">
+            <select class="form-input" id="priority" th:field="*{priority}">
                 <option value=""></option>
-                <option value="1" th:selected="${todo.priority == 1}">高</option>
-                <option value="2" th:selected="${todo.priority == 2}">中</option>
-                <option value="3" th:selected="${todo.priority == 3}">低</option>
+                <option value="1">高</option>
+                <option value="2">中</option>
+                <option value="3">低</option>
             </select>
+            <p class="error" th:errors="*{priority}"></p>
         </div>
 
         <div class="form-row">
             <label class="form-label" for="dueDate">期限</label>
-            <input class="form-input" type="date" id="dueDate" name="dueDate" th:value="${todo.dueDate}">
+            <input class="form-input" type="date" id="dueDate" th:field="*{dueDate}">
         </div>
 
         <div class="confirm-actions">
