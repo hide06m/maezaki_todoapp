@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>テスト仕様書</title>
+  <style>
+    :root {
+      --border: #9aa4b2;
+      --bg: #f7f9fc;
+      --head: #e9eef5;
+      --text: #1f2937;
+    }
+    body {
+      margin: 0;
+      padding: 16px;
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      background: white;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .print-btn {
+      border: 1px solid #334155;
+      background: #fff;
+      color: #111827;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 12px;
+    }
+    col.no { width: 5%; }
+    col.check { width: 20%; }
+    col.input { width: 15%; }
+    col.expect { width: 25%; }
+    col.result { width: 10%; }
+    col.note { width: 25%; }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 6px;
+      vertical-align: top;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    th {
+      background: var(--head);
+      text-align: left;
+      font-weight: 700;
+    }
+    tbody tr:nth-child(even) td {
+      background: var(--bg);
+    }
+    .result-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+    .result-group label {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .note-area {
+      width: 100%;
+      box-sizing: border-box;
+      resize: none;
+      min-height: 3.4em;
+      font: inherit;
+      line-height: 1.3;
+      padding: 4px;
+    }
+    .nowrap { white-space: nowrap; }
+    @media print {
+      body { padding: 0; }
+      .toolbar { display: none; }
+      .note-area {
+        overflow: hidden;
+        min-height: 0;
+      }
+      .no-print {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar no-print">
+    <button type="button" class="print-btn" id="printBtn">PDFで保存</button>
+  </div>
+
+  <table>
+    <colgroup>
+      <col class="no">
+      <col class="check">
+      <col class="input">
+      <col class="expect">
+      <col class="result">
+      <col class="note">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>番号</th>
+        <th>確かめること</th>
+        <th>入れる値</th>
+        <th>期待する結果</th>
+        <th>結果</th>
+        <th>備考/NG</th>
+      </tr>
+    </thead>
+    <tbody id="specBody"></tbody>
+  </table>
+
+  <script>
+    const rows = [
+      ['1', 'このアプリでできること: todo を一覧で表示する', '何も入れない', 'localhost:8080 を開くと、登録済みの todo が5行表示される。'],
+      ['2', 'このアプリでできること: todo を新しく登録する', '例: 会議に出る', '入力した文字が todo として追加され、一覧に1行増える。'],
+      ['3', 'このアプリでできること: 登録した todo を編集する', '例: 会議に出る を 会議に出席する に変更', '編集後の文字が一覧に反映される。'],
+      ['4', 'このアプリでできること: todo を完了にする', '編集で増やした行を対象にする', '選んだ行が完了状態になって見た目が変わる。'],
+      ['5', 'このアプリでできること: todo を削除する', '編集で増やした行を対象にする', '選んだ行が一覧から消える。'],
+      ['6', 'このアプリでできること: todo を検索する', '例: 会議', '入力した文字を含む todo だけが表示される。'],
+      ['7', '画面ごとの中身: 一覧画面が表示される', '何も入れない', '一覧画面に todo の表と操作欄が表示される。'],
+      ['8', '画面ごとの中身: 登録画面が表示される', '例: 会議に出る', '登録用の入力欄に文字を入れて追加できる。'],
+      ['9', '画面ごとの中身: 編集画面が表示される', '例: 会議に出る', '編集用の入力欄で文字を直せる。'],
+      ['10', '画面ごとの中身: 完了画面が表示される', '編集で増やした行を対象にする', '完了にする操作ができる行が表示される。'],
+      ['11', '画面ごとの中身: 削除画面が表示される', '編集で増やした行を対象にする', '削除する操作ができる行が表示される。'],
+      ['12', '画面ごとの中身: 検索画面が表示される', '例: 会議', '検索用の入力欄に文字を入れて絞り込める。'],
+      ['13', '決まりごと: 入力が空のときは登録できない', '空欄', '入力がないことを知らせる文が出て、todo は増えない。'],
+      ['14', '決まりごと: 操作のあとに追加した文が出る', '例: 会議に出る', '登録後に、追加したことがわかる文が画面に出る。'],
+      ['15', '決まりごと: 操作のあとに編集した文が出る', '例: 会議に出る を 会議に出席する に変更', '編集後に、更新したことがわかる文が画面に出る。'],
+      ['16', '決まりごと: 操作のあとに完了した文が出る', '編集で増やした行を対象にする', '完了後に、完了にしたことがわかる文が画面に出る。'],
+      ['17', '決まりごと: 操作のあとに削除した文が出る', '編集で増やした行を対象にする', '削除後に、削除したことがわかる文が画面に出る。'],
+      ['18', '決まりごと: 検索の結果が画面に出る', '例: 会議', '検索した文字に合う行だけが画面に出る。'],
+      ['19', '決まりごと: 並び替えの結果が画面に出る', '例: 完了順の並び替え', '選んだ並び順で todo の表示順が変わる。'],
+      ['20', '最後に、テストで増やした行を消して todos を5行へ戻す', '編集で増やした行を対象にする', '増やした1行が消えて、todo が5行に戻る。']
+    ];
+
+    const tbody = document.getElementById('specBody');
+    tbody.innerHTML = rows.map((row, index) => `
+      <tr>
+        <td class="nowrap">${row[0]}</td>
+        <td>${row[1]}</td>
+        <td>${row[2]}</td>
+        <td>${row[3]}</td>
+        <td>
+          <div class="result-group">
+            <label><input type="radio" name="result-${index}" value="OK">OK</label>
+            <label><input type="radio" name="result-${index}" value="NG">NG</label>
+          </div>
+        </td>
+        <td><textarea class="note-area" rows="2" placeholder="NGのときは、何がどう出たかを書く"></textarea></td>
+      </tr>
+    `).join('');
+
+    function resizeTextarea(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    function syncTextareaHeights() {
+      document.querySelectorAll('.note-area').forEach((textarea) => {
+        resizeTextarea(textarea);
+        textarea.addEventListener('input', () => resizeTextarea(textarea));
+      });
+    }
+
+    document.getElementById('printBtn').addEventListener('click', () => {
+      document.querySelectorAll('.note-area').forEach((textarea) => resizeTextarea(textarea));
+      window.print();
+    });
+
+    window.addEventListener('beforeprint', () => {
+      document.querySelectorAll('.note-area').forEach((textarea) => resizeTextarea(textarea));
+    });
+
+    syncTextareaHeights();
+  </script>
+</body>
+</html>

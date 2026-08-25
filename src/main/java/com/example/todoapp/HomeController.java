@@ -25,15 +25,15 @@ public class HomeController {
             "就職活動"
     );
 
-    private final TodoMapper todoMapper;
+    private final TodoService todoService;
 
-    public HomeController(TodoMapper todoMapper) {
-        this.todoMapper = todoMapper;
+    public HomeController(TodoService todoService) {
+        this.todoService = todoService;
     }
 
     @GetMapping("/")
     public String index(Model model) {
-        model.addAttribute("title", "Todo繧｢繝励Μ");
+        model.addAttribute("title", "Todoアプリ");
         return "index";
     }
 
@@ -43,7 +43,7 @@ public class HomeController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false, defaultValue = "asc") String order,
             Model model) {
-        List<Todo> todos = todoMapper.search(keyword, category, order);
+        List<Todo> todos = todoService.search(keyword, category, order);
         model.addAttribute("todos", todos);
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedCategory", category);
@@ -76,16 +76,16 @@ public class HomeController {
 
     @PostMapping("/todos")
     public String create(@ModelAttribute Todo todo, RedirectAttributes redirectAttributes) {
-        todoMapper.insert(todo);
-        redirectAttributes.addFlashAttribute("message", "逋ｻ骭ｲ縺励∪縺励◆");
+        todoService.create(todo);
+        redirectAttributes.addFlashAttribute("message", "登録しました");
         return "redirect:/todos";
     }
 
     @GetMapping("/todos/{id}/edit")
     public String edit(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
-        Todo todo = todoMapper.findById(id);
+        Todo todo = todoService.findById(id);
         if (todo == null) {
-            redirectAttributes.addFlashAttribute("message", "隕九▽縺九ｊ縺ｾ縺帙ｓ縺ｧ縺励◆");
+            redirectAttributes.addFlashAttribute("message", "見つかりませんでした");
             return "redirect:/todos";
         }
         model.addAttribute("todo", todo);
@@ -113,16 +113,16 @@ public class HomeController {
     @PostMapping("/todos/{id}")
     public String update(@PathVariable Long id, @ModelAttribute Todo todo, RedirectAttributes redirectAttributes) {
         todo.setId(id);
-        todoMapper.update(todo);
-        redirectAttributes.addFlashAttribute("message", "菫晏ｭ倥＠縺ｾ縺励◆");
+        todoService.update(todo);
+        redirectAttributes.addFlashAttribute("message", "保存しました");
         return "redirect:/todos";
     }
 
     @GetMapping("/todos/{id}/delete")
     public String deleteConfirm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
-        Todo todo = todoMapper.findById(id);
+        Todo todo = todoService.findById(id);
         if (todo == null) {
-            redirectAttributes.addFlashAttribute("message", "隕九▽縺九ｊ縺ｾ縺帙ｓ縺ｧ縺励◆");
+            redirectAttributes.addFlashAttribute("message", "見つかりませんでした");
             return "redirect:/todos";
         }
         model.addAttribute("todo", todo);
@@ -131,8 +131,8 @@ public class HomeController {
 
     @PostMapping("/todos/{id}/delete")
     public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        todoMapper.deleteById(id);
-        redirectAttributes.addFlashAttribute("message", "蜑企勁縺励∪縺励◆");
+        todoService.delete(id);
+        redirectAttributes.addFlashAttribute("message", "削除しました");
         return "redirect:/todos";
     }
 }
