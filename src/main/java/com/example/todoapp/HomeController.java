@@ -21,7 +21,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model) {
-        model.addAttribute("title", "Todo\u30A2\u30D7\u30EA");
+        model.addAttribute("title", "Todoアプリ");
         return "index";
     }
 
@@ -53,7 +53,7 @@ public class HomeController {
     @PostMapping("/todos")
     public String create(@ModelAttribute Todo todo, RedirectAttributes redirectAttributes) {
         todoMapper.insert(todo);
-        redirectAttributes.addFlashAttribute("message", "\u767B\u9332\u3057\u307E\u3057\u305F");
+        redirectAttributes.addFlashAttribute("message", "登録しました");
         return "redirect:/todos";
     }
 
@@ -61,7 +61,7 @@ public class HomeController {
     public String edit(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Todo todo = todoMapper.findById(id);
         if (todo == null) {
-            redirectAttributes.addFlashAttribute("message", "\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3067\u3057\u305F");
+            redirectAttributes.addFlashAttribute("message", "見つかりませんでした");
             return "redirect:/todos";
         }
         model.addAttribute("todo", todo);
@@ -87,6 +87,24 @@ public class HomeController {
         todo.setId(id);
         todoMapper.update(todo);
         redirectAttributes.addFlashAttribute("message", "保存しました");
+        return "redirect:/todos";
+    }
+
+    @GetMapping("/todos/{id}/delete")
+    public String deleteConfirm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        Todo todo = todoMapper.findById(id);
+        if (todo == null) {
+            redirectAttributes.addFlashAttribute("message", "見つかりませんでした");
+            return "redirect:/todos";
+        }
+        model.addAttribute("todo", todo);
+        return "delete";
+    }
+
+    @PostMapping("/todos/{id}/delete")
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        todoMapper.deleteById(id);
+        redirectAttributes.addFlashAttribute("message", "削除しました");
         return "redirect:/todos";
     }
 }
