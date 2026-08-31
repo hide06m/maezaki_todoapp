@@ -2,10 +2,12 @@ package com.example.todoapp.api;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.todoapp.Todo;
 import com.example.todoapp.TodoService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 public class TodoApiController {
@@ -48,7 +53,15 @@ public class TodoApiController {
     }
 
     @PostMapping("/api/todos")
-    public ResponseEntity<TodoDto> create(@RequestBody Todo todo) {
+    public ResponseEntity<?> create(
+            @Valid @RequestBody TodoRequest todoRequest,
+            BindingResult bindingResult,
+            HttpServletRequest httpServletRequest) {
+        if (bindingResult.hasErrors()) {
+            return badRequest(bindingResult, httpServletRequest);
+        }
+
+        Todo todo = toTodo(todoRequest);
         todoService.create(todo);
 
         Todo createdTodo = todoService.findById(todo.getId());
@@ -57,12 +70,21 @@ public class TodoApiController {
     }
 
     @PutMapping("/api/todos/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Todo todo) {
+    public ResponseEntity<?> update(
+            @PathVariable Long id,
+            @Valid @RequestBody TodoRequest todoRequest,
+            BindingResult bindingResult,
+            HttpServletRequest httpServletRequest) {
+        if (bindingResult.hasErrors()) {
+            return badRequest(bindingResult, httpServletRequest);
+        }
+
         Todo existingTodo = todoService.findById(id);
         if (existingTodo == null) {
             return notFound(id);
         }
 
+        Todo todo = toTodo(todoRequest);
         todo.setId(id);
         todoService.update(todo);
 
@@ -87,5 +109,32 @@ public class TodoApiController {
         problemDetail.setDetail("Todo id=" + id + " was not found.");
         problemDetail.setInstance(URI.create("/api/todos/" + id));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
+    }
+
+    private ResponseEntity<ProblemDetail> badRequest(
+            BindingResult bindingResult,
+            HttpServletRequest httpServletRequest) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Bad Request");
+        problemDetail.setDetail("入力に誤りがあります");
+        problemDetail.setInstance(URI.create(httpServletRequest.getRequestURI()));
+        problemDetail.setProperty("errors", bindingResult.getFieldErrors()
+                .stream()
+                .map(error -> Map.of(
+                        "field", error.getField(),
+                        "message", error.getDefaultMessage()))
+                .toList());
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+    private Todo toTodo(TodoRequest todoRequest) {
+        Todo todo = new Todo();
+        todo.setTitle(todoRequest.getTitle());
+        todo.setDetail(todoRequest.getDetail());
+        todo.setCategory(todoRequest.getCategory());
+        todo.setPriority(todoRequest.getPriority());
+        todo.setDueDate(todoRequest.getDueDate());
+        todo.setCompleted(todoRequest.getCompleted());
+        return todo;
     }
 }
