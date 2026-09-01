@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カレンダー</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<main class="container">
+    <div class="calendar-header">
+        <a class="btn sub" th:href="@{/calendar(year=${previousYear}, month=${previousMonth})}">前の月</a>
+        <h1 class="page-title calendar-title" th:text="${currentMonth.year} + '年' + ${currentMonth.monthValue} + '月'">2026年4月</h1>
+        <a class="btn sub" th:href="@{/calendar(year=${nextYear}, month=${nextMonth})}">次の月</a>
+    </div>
+
+    <table class="calendar-table" th:attr="data-from=${fromDate}, data-to=${toDate}">
+        <thead>
+        <tr>
+            <th th:each="weekday : ${weekdays}" th:text="${weekday}">日</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="week : ${weeks}">
+            <th:block th:each="day : ${week}">
+                <td th:if="${day == null}" class="calendar-day calendar-day-empty"></td>
+                <td th:if="${day != null}" class="calendar-day" th:attr="data-date=${day.dateText}">
+                    <span class="calendar-day-number" th:text="${day.dayOfMonth}">1</span>
+                </td>
+            </th:block>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
