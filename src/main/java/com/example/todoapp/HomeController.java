@@ -43,7 +43,7 @@ public class HomeController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false, defaultValue = "asc") String order,
             Model model) {
-        List<Todo> todos = todoService.search(keyword, category, order);
+        List<Todo> todos = todoService.search(keyword, category, order, null, null);
         model.addAttribute("todos", todos);
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedCategory", category);

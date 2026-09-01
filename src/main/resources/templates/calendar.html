@@ -9,9 +9,15 @@
 <body>
 <main class="container">
     <div class="calendar-header">
-        <a class="btn sub" th:href="@{/calendar(year=${previousYear}, month=${previousMonth})}">前の月</a>
+        <div class="calendar-header-left">
+            <a class="btn sub" th:href="@{/calendar(year=${previousYear}, month=${previousMonth})}">前の月</a>
+            <a class="btn sub" th:href="@{/calendar(year=${nextYear}, month=${nextMonth})}">次の月</a>
+        </div>
         <h1 class="page-title calendar-title" th:text="${currentMonth.year} + '年' + ${currentMonth.monthValue} + '月'">2026年4月</h1>
-        <a class="btn sub" th:href="@{/calendar(year=${nextYear}, month=${nextMonth})}">次の月</a>
+        <div class="calendar-header-right">
+            <a class="btn sub" href="/todos">表で見る</a>
+            <a class="btn" href="/todos/new">新規登録</a>
+        </div>
     </div>
 
     <table class="calendar-table" th:attr="data-from=${fromDate}, data-to=${toDate}">
@@ -37,18 +43,65 @@ async function loadCalendarTodos() {
     const table = document.querySelector(".calendar-table");
     const from = table.dataset.from;
     const to = table.dataset.to;
+
+    const holidayRes = await fetch(`/api/holidays?from=${from}&to=${to}`);
+    const holidays = await holidayRes.json();
+    if (holidayRes.headers.has("X-Holidays-Unavailable")) {
+        const message = document.createElement("p");
+        message.textContent = "祝日を取れませんでした";
+        table.before(message);
+    }
+
+    const cells = document.querySelectorAll(".calendar-day[data-date]");
+    for (const cell of cells) {
+        const dateText = cell.dataset.date;
+        const weekday = new Date(`${dateText}T00:00:00`).getDay();
+
+        if (holidays[dateText] != null) {
+            cell.style.backgroundColor = "#fef3c7";
+            cell.title = holidays[dateText];
+        } else if (weekday === 0) {
+            cell.style.backgroundColor = "#fee2e2";
+        } else if (weekday === 6) {
+            cell.style.backgroundColor = "#dbeafe";
+        }
+    }
+
     const res = await fetch(`/api/todos?from=${from}&to=${to}`);
     const todos = await res.json();
 
+    const today = new Date().toISOString().slice(0, 10);
+    const todosByDate = {};
     for (const todo of todos) {
-        const cell = document.querySelector(`[data-date="${todo.dueDate}"]`);
+        if (todosByDate[todo.dueDate] == null) {
+            todosByDate[todo.dueDate] = [];
+        }
+        todosByDate[todo.dueDate].push(todo);
+    }
+
+    for (const [dateText, dateTodos] of Object.entries(todosByDate)) {
+        const cell = document.querySelector(`[data-date="${dateText}"]`);
         if (cell == null) {
             continue;
         }
 
-        const todoName = document.createElement("div");
-        todoName.textContent = todo.title;
-        cell.appendChild(todoName);
+        for (const todo of dateTodos.slice(0, 3)) {
+            const todoName = document.createElement("a");
+            todoName.href = `/todos/${todo.id}/edit`;
+            todoName.className = "link";
+            todoName.style.display = "block";
+            todoName.textContent = todo.title;
+            if (todo.dueDate < today && todo.completed !== true) {
+                todoName.style.color = "#dc2626";
+            }
+            cell.appendChild(todoName);
+        }
+
+        if (dateTodos.length > 3) {
+            const moreTodos = document.createElement("div");
+            moreTodos.textContent = `ほか ${dateTodos.length - 3}件`;
+            cell.appendChild(moreTodos);
+        }
     }
 }
 

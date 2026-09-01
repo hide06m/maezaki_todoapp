@@ -126,6 +126,16 @@ body {
     margin-bottom: 20px;
 }
 
+.calendar-header-left,
+.calendar-header-right {
+    display: flex;
+    flex: 1;
+    gap: 8px;
+}
+
+.calendar-header-right {
+    justify-content: flex-end;
+}
 .calendar-title {
     margin: 0;
     text-align: center;
