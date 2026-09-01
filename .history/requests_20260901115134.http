@@ -37,6 +37,3 @@ GET https://holidays-jp.github.io/api/v1/date.json
 
 ### 6. 自分のアプリの祝日API
 GET http://localhost:8080/api/holidays
-
-#### 7. 期間指定で取得する
-GET http://localhost:8080/api/todos?from=2026-09-01&to=2026-09-30

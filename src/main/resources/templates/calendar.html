@@ -32,5 +32,27 @@
         </tbody>
     </table>
 </main>
+<script>
+async function loadCalendarTodos() {
+    const table = document.querySelector(".calendar-table");
+    const from = table.dataset.from;
+    const to = table.dataset.to;
+    const res = await fetch(`/api/todos?from=${from}&to=${to}`);
+    const todos = await res.json();
+
+    for (const todo of todos) {
+        const cell = document.querySelector(`[data-date="${todo.dueDate}"]`);
+        if (cell == null) {
+            continue;
+        }
+
+        const todoName = document.createElement("div");
+        todoName.textContent = todo.title;
+        cell.appendChild(todoName);
+    }
+}
+
+loadCalendarTodos();
+</script>
 </body>
 </html>
