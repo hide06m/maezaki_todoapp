@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,26 +21,35 @@ public class HolidayApiController {
     }
 
     @GetMapping
-    public Map<String, String> getHolidays(
+    public ResponseEntity<Map<String, String>> getHolidays(
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to) {
-        Map<String, String> holidays = holidayClient.fetchHolidays();
+        HolidayClient.HolidayFetchResult result = holidayClient.fetchHolidays();
+        Map<String, String> holidays = result.holidays();
 
+        Map<String, String> responseBody;
         if (from == null && to == null) {
-            return holidays;
+            responseBody = holidays;
+        } else {
+            Map<String, String> filteredHolidays = new TreeMap<>();
+            holidays.forEach((date, name) -> {
+                LocalDate holidayDate = LocalDate.parse(date);
+                boolean afterFrom = from == null || !holidayDate.isBefore(from);
+                boolean beforeTo = to == null || !holidayDate.isAfter(to);
+
+                if (afterFrom && beforeTo) {
+                    filteredHolidays.put(date, name);
+                }
+            });
+            responseBody = filteredHolidays;
         }
 
-        Map<String, String> filteredHolidays = new TreeMap<>();
-        holidays.forEach((date, name) -> {
-            LocalDate holidayDate = LocalDate.parse(date);
-            boolean afterFrom = from == null || !holidayDate.isBefore(from);
-            boolean beforeTo = to == null || !holidayDate.isAfter(to);
+        if (result.unavailable()) {
+            return ResponseEntity.ok()
+                    .header("X-Holidays-Unavailable", "true")
+                    .body(responseBody);
+        }
 
-            if (afterFrom && beforeTo) {
-                filteredHolidays.put(date, name);
-            }
-        });
-
-        return filteredHolidays;
+        return ResponseEntity.ok(responseBody);
     }
 }
